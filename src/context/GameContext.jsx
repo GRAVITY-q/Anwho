@@ -98,9 +98,9 @@ function gameReducer(state, action) {
                 if (Math.random() > 0.5) {
                     const categoryObj = CATEGORIES.find(c => c.id === state.category);
                     if (categoryObj) {
-                        const otherWords = categoryObj.words.filter(w => w !== word);
+                        const otherWords = categoryObj.words.filter(w => w.word !== word);
                         if (otherWords.length > 0) {
-                            fakeWord = otherWords[Math.floor(Math.random() * otherWords.length)];
+                            fakeWord = otherWords[Math.floor(Math.random() * otherWords.length)].word;
                         }
                     }
                 }
