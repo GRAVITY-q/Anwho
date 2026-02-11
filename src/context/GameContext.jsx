@@ -84,7 +84,7 @@ function gameReducer(state, action) {
             // Generate Hint if enabled
             let hint = '';
             if (state.enableHint) {
-                hint = getVagueHint(state.category);
+                hint = getVagueHint(state.category, word);
             }
 
             // Fast Mode Setup
