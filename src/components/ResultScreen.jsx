@@ -134,11 +134,15 @@ function ResultScreen() {
         const isCrewWin = state.winner === ROLE.CREW;
         return (
             <div className="center-content fade-in" style={{
-                justifyContent: 'flex-start',
-                paddingTop: '80px',
-                overflowY: 'auto',
+                justifyContent: 'center',
+                overflow: 'hidden',
                 width: '100%',
-                paddingBottom: '100px' // Space for fixed button
+                height: '100vh',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                zIndex: 50,
+                padding: 'var(--spacing-lg)'
             }}>
                 <div style={{
                     marginBottom: 'var(--spacing-lg)',
@@ -211,7 +215,13 @@ function ResultScreen() {
                     </div>
                 </div>
 
-                <div style={{ width: '100%', marginBottom: 'var(--spacing-xl)' }}>
+                <div style={{
+                    width: '100%',
+                    marginBottom: 'var(--spacing-md)',
+                    maxHeight: '35vh',
+                    overflowY: 'auto',
+                    paddingRight: '5px'
+                }}>
                     <h3 style={{
                         marginBottom: 'var(--spacing-md)',
                         color: 'var(--text-secondary)',
@@ -279,13 +289,9 @@ function ResultScreen() {
                 </div>
 
                 <div style={{
-                    position: 'fixed',
-                    bottom: '20px',
-                    left: '50%',
-                    transform: 'translateX(-50%)',
                     width: '100%',
-                    maxWidth: '460px', /* slight padding from container max-width */
-                    padding: '0 20px',
+                    marginTop: 'var(--spacing-sm)',
+                    padding: '0 10px',
                     zIndex: 10
                 }}>
                     <button className="btn-primary" onClick={() => dispatch({ type: 'RESET_GAME' })} style={{
