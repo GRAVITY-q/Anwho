@@ -326,7 +326,7 @@ function SetupScreen() {
             </button>
 
             <p style={{ textAlign: 'center', marginTop: 'var(--spacing-lg)', color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-                Pass the phone to play together locally.
+                Pass the device to play together locally.
             </p>
         </div>
     );

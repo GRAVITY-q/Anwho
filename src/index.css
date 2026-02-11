@@ -189,6 +189,7 @@ h6 {
   width: 100%;
   max-width: 300px;
   height: 400px;
+  margin: 0 auto;
   margin-bottom: var(--spacing-xl);
   cursor: pointer;
 }
@@ -258,7 +259,6 @@ input:focus {
 .scroll-lock {
   height: 100vh;
   overflow: hidden;
-  position: fixed;
   width: 100%;
   touch-action: none;
 }

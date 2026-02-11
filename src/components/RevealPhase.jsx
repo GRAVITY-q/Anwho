@@ -33,7 +33,7 @@ function RevealPhase() {
                     <User size={64} style={{ color: 'var(--text-accent)' }} />
                 </div>
 
-                <h2 style={{ marginBottom: 'var(--spacing-md)', fontSize: 'var(--font-size-xl)' }}>Pass phone to</h2>
+                <h2 style={{ marginBottom: 'var(--spacing-md)', fontSize: 'var(--font-size-xl)' }}>Pass device to</h2>
                 <h1 style={{
                     fontSize: 'var(--font-size-3xl)',
                     background: 'linear-gradient(to right, var(--accent-primary), var(--accent-secondary))',
@@ -101,8 +101,8 @@ function RevealPhase() {
             </div>
 
             {isFlipped && (
-                <button className="btn-primary" onClick={handleCreateNext} style={{ marginTop: '0', maxWidth: '300px' }}>
-                    Got it, Next Player
+                <button className="btn-primary" onClick={handleCreateNext} style={{ marginTop: '0', maxWidth: '300px', background: 'gray', color: 'black' }}>
+                    GOT IT
                 </button>
             )}
         </div>
