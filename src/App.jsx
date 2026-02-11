@@ -32,8 +32,11 @@ function GameContainer() {
     }
   };
 
+  // Determine if the current phase should be scrollable
+  const isScrollable = state.phase === PHASE.SETUP || state.phase === PHASE.RESULT || state.phase === PHASE.GAME_OVER;
+
   return (
-    <div className="container">
+    <div className={`container ${!isScrollable ? 'scroll-lock' : ''}`}>
       {renderPhase()}
     </div>
   );

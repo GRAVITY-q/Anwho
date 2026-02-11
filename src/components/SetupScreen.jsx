@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGame, ROLE } from '../context/GameContext';
 import { CATEGORIES } from '../data/words';
-import { Users, UserX, Play, Zap, Lightbulb, Ghost } from 'lucide-react';
+import { Users, UserX, Play, Zap, Lightbulb, Ghost, ChevronDown, ChevronUp, X, Check } from 'lucide-react';
 
 function SetupScreen() {
     const { state, dispatch } = useGame();
+    const [isNamesExpanded, setIsNamesExpanded] = useState(false);
 
     const handlePlayerCountChange = (delta) => {
         const newCount = Math.max(3, Math.min(12, state.playerCount + delta));
@@ -28,9 +29,7 @@ function SetupScreen() {
 
     return (
         <div className="fade-in" style={{ width: '100%', maxWidth: '400px' }}>
-            <h1 style={{ fontSize: 'var(--font-size-3xl)', textAlign: 'center', marginBottom: 'var(--spacing-xl)', color: 'var(--text-accent)' }}>
-                IMPOSTOR
-            </h1>
+
 
             <div className="card">
                 <label style={{ display: 'block', marginBottom: 'var(--spacing-sm)', color: 'var(--text-secondary)' }}>
@@ -84,32 +83,135 @@ function SetupScreen() {
                 </div>
             </div>
 
-            <div className="card">
-                <label style={{ display: 'block', marginBottom: 'var(--spacing-sm)', color: 'var(--text-secondary)' }}>
-                    Player Names
-                </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', maxHeight: '200px', overflowY: 'auto' }}>
-                    {Array.from({ length: state.playerCount }, (_, i) => i + 1).map(id => (
-                        <input
-                            key={id}
-                            type="text"
-                            placeholder={`Player ${id}`}
-                            maxLength={10}
-                            value={state.playerNames[id] || ''}
-                            onChange={(e) => dispatch({ type: 'SET_PLAYER_NAME', payload: { id, name: e.target.value } })}
-                            style={{
-                                backgroundColor: 'var(--bg-primary)',
-                                border: '1px solid var(--bg-tertiary)',
-                                color: 'white',
-                                padding: 'var(--spacing-md)',
-                                borderRadius: 'var(--radius-sm)',
-                                width: '100%',
-                                fontSize: 'var(--font-size-base)'
-                            }}
-                        />
+            {/* Player Names Trigger Card */}
+            <div
+                className="card"
+                onClick={() => setIsNamesExpanded(true)}
+                style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
+            >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-sm)' }}>
+                    <label style={{ display: 'block', color: 'var(--text-secondary)', cursor: 'pointer', margin: 0 }}>
+                        Player Names
+                    </label>
+                    <div style={{
+                        background: 'var(--bg-tertiary)',
+                        padding: '4px 12px',
+                        borderRadius: '12px',
+                        fontSize: 'var(--font-size-sm)',
+                        color: 'var(--text-primary)'
+                    }}>
+                        Edit
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {Array.from({ length: Math.min(state.playerCount, 4) }, (_, i) => i + 1).map(id => (
+                        <span key={id} style={{
+                            fontSize: '0.8rem',
+                            background: 'rgba(255,255,255,0.05)',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            color: state.playerNames[id] ? 'white' : 'var(--text-secondary)'
+                        }}>
+                            {state.playerNames[id] || `Player ${id}`}
+                        </span>
                     ))}
+                    {state.playerCount > 4 && (
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', padding: '4px' }}>
+                            +{state.playerCount - 4} more...
+                        </span>
+                    )}
                 </div>
             </div>
+
+            {/* Full Screen Player Name Editor Overlay */}
+            {isNamesExpanded && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    zIndex: 100,
+                    backgroundColor: 'rgba(15, 23, 42, 0.8)',
+                    backdropFilter: 'blur(10px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '20px',
+                    animation: 'fadeIn 0.2s ease-out'
+                }}>
+                    <div
+                        className="card"
+                        style={{
+                            width: '100%',
+                            maxWidth: '500px',
+                            maxHeight: '90vh',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            margin: 0,
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+                        }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-lg)' }}>
+                            <h2 style={{ fontSize: 'var(--font-size-xl)', margin: 0 }}>Edit Players</h2>
+                            <button
+                                onClick={() => setIsNamesExpanded(false)}
+                                style={{
+                                    background: 'var(--bg-tertiary)',
+                                    border: 'none',
+                                    borderRadius: '50%',
+                                    width: '32px',
+                                    height: '32px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: 'white'
+                                }}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', paddingRight: '4px' }}>
+                            {Array.from({ length: state.playerCount }, (_, i) => i + 1).map(id => (
+                                <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <span style={{ color: 'var(--text-secondary)', width: '24px', fontSize: '0.9rem' }}>{id}.</span>
+                                    <input
+                                        type="text"
+                                        placeholder={`Player ${id}`}
+                                        maxLength={10}
+                                        value={state.playerNames[id] || ''}
+                                        autoFocus={id === 1}
+                                        onChange={(e) => dispatch({ type: 'SET_PLAYER_NAME', payload: { id, name: e.target.value } })}
+                                        style={{
+                                            backgroundColor: 'var(--bg-primary)',
+                                            border: '1px solid var(--bg-tertiary)',
+                                            color: 'white',
+                                            padding: 'var(--spacing-md)',
+                                            borderRadius: 'var(--radius-sm)',
+                                            width: '100%',
+                                            fontSize: 'var(--font-size-base)'
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        <button
+                            className="btn-primary"
+                            onClick={() => setIsNamesExpanded(false)}
+                            style={{ marginTop: 'var(--spacing-lg)' }}
+                        >
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                <Check size={20} /> Done
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div className="card">
                 <label style={{ display: 'block', marginBottom: 'var(--spacing-sm)', color: 'var(--text-secondary)' }}>
