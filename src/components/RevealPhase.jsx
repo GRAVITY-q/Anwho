@@ -22,7 +22,7 @@ function RevealPhase() {
 
     if (!isReady) {
         return (
-            <div className="center-content fade-in">
+            <div className="center-content fade-in" style={{ paddingTop: '80px' }}>
                 <div style={{
                     background: 'var(--bg-secondary)',
                     padding: '40px',
@@ -44,7 +44,7 @@ function RevealPhase() {
                     {currentPlayer.name}
                 </h1>
 
-                <button className="btn-primary" onClick={() => setIsReady(true)}>
+                <button className="btn-primary" onClick={() => setIsReady(true)} style={{ marginTop: '75px' }}>
                     I am {currentPlayer.name}
                 </button>
             </div>
