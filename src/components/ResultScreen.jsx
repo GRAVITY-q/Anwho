@@ -65,70 +65,52 @@ function ResultScreen() {
         }
     };
 
-    const [loadingText, setLoadingText] = useState('INITIALIZING SCAN');
-    const [progress, setProgress] = useState(0);
+    const [cycleState, setCycleState] = useState({ text: 'VICTORY', color: 'var(--accent-success)' });
 
     useEffect(() => {
         if (displayState !== 'calculating') return;
 
-        // Simpler text cycling for the minimal loader
-        const texts = ['ANALYZING', 'CALCULATING', 'VERIFYING'];
-        let textIndex = 0;
+        const interval = setInterval(() => {
+            setCycleState(prev => prev.text === 'VICTORY'
+                ? { text: 'DEFEAT', color: 'var(--accent-error)' }
+                : { text: 'VICTORY', color: 'var(--accent-success)' }
+            );
+        }, 150);
 
-        const textInterval = setInterval(() => {
-            textIndex = (textIndex + 1) % texts.length;
-            setLoadingText(texts[textIndex]);
-        }, 1000);
-
-        const progressInterval = setInterval(() => {
-            setProgress(prev => Math.min(prev + 1, 100)); // Cap at 100
-        }, 30);
-
-        return () => {
-            clearInterval(textInterval);
-            clearInterval(progressInterval);
-        };
+        return () => clearInterval(interval);
     }, [displayState]);
 
     if (displayState === 'calculating') {
         return (
             <div className="center-content">
                 {state.gameMode === 'fast' ? (
-                    <div style={{ position: 'relative', width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="120" height="120" viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
-                            <circle
-                                cx="60"
-                                cy="60"
-                                r="54"
-                                fill="none"
-                                stroke="rgba(255,255,255,0.1)"
-                                strokeWidth="4"
-                            />
-                            <circle
-                                cx="60"
-                                cy="60"
-                                r="54"
-                                fill="none"
-                                stroke="var(--accent-primary)"
-                                strokeWidth="4"
-                                strokeDasharray="339.292"
-                                strokeDashoffset={339.292 * (1 - progress / 100)}
-                                style={{ transition: 'stroke-dashoffset 0.03s linear' }}
-                            />
-                        </svg>
-
-                        <div style={{ position: 'absolute', textAlign: 'center', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                            <h2 style={{
-                                fontSize: '0.8rem',
-                                letterSpacing: '0.2em',
-                                color: 'white',
-                                fontWeight: '300',
-                                marginBottom: '0',
-                                opacity: 0.8
-                            }}>
-                                ANALYZING
-                            </h2>
-                        </div>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '200px'
+                    }}>
+                        <h2 style={{
+                            fontSize: '3rem',
+                            fontWeight: '900',
+                            color: cycleState.color,
+                            letterSpacing: '0.1em',
+                            transition: 'color 0.1s',
+                            textShadow: `0 0 30px ${cycleState.color}`
+                        }}>
+                            {cycleState.text}
+                        </h2>
+                        <div style={{
+                            marginTop: '20px',
+                            width: '40px',
+                            height: '40px',
+                            border: '4px solid rgba(255,255,255,0.1)',
+                            borderTop: '4px solid white',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                        }}></div>
+                        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                     </div>
                 ) : (
                     <>
@@ -142,7 +124,6 @@ function ResultScreen() {
                             borderRadius: '50%',
                             animation: 'spin 1s linear infinite'
                         }}></div>
-                        <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                     </>
                 )}
             </div>
