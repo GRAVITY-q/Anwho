@@ -101,7 +101,7 @@ function RevealPhase() {
             </div>
 
             {isFlipped && (
-                <button className="btn-primary" onClick={handleCreateNext} style={{ marginTop: '0', maxWidth: '300px', background: 'gray', color: 'black' }}>
+                <button className="btn-primary" onClick={handleCreateNext} style={{ marginTop: '0', maxWidth: '300px', background: 'white', color: 'black' }}>
                     GOT IT
                 </button>
             )}
