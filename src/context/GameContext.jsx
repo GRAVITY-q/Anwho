@@ -24,7 +24,8 @@ const initialState = {
     playerCount: 4,
     impostorCount: 1,
     playerNames: {}, // { 1: 'Alice', 2: 'Bob' }
-    category: 'food',
+    categories: ['food'],
+    currentCategory: null, // The category selected for the specific round
     secretWord: '',
     currentPlayerIndex: 0,
     votes: {}, // { voterId: suspectId }
@@ -51,8 +52,19 @@ function gameReducer(state, action) {
                 ...state,
                 playerNames: { ...state.playerNames, [action.payload.id]: action.payload.name }
             };
-        case 'SET_CATEGORY':
-            return { ...state, category: action.payload };
+        case 'TOGGLE_CATEGORY':
+            const categoryId = action.payload;
+            const isSelected = state.categories.includes(categoryId);
+            let newCategories;
+
+            if (isSelected) {
+                // Prevent removing the last category
+                if (state.categories.length <= 1) return state;
+                newCategories = state.categories.filter(id => id !== categoryId);
+            } else {
+                newCategories = [...state.categories, categoryId];
+            }
+            return { ...state, categories: newCategories };
         case 'SET_GAME_MODE':
             return { ...state, gameMode: action.payload };
         case 'TOGGLE_HINT':
@@ -79,12 +91,13 @@ function gameReducer(state, action) {
             }
 
             // Select Secret Word
-            const word = getRandomWord(state.category);
+            const currentCategory = state.categories[Math.floor(Math.random() * state.categories.length)];
+            const word = getRandomWord(currentCategory);
 
             // Generate Hint if enabled
             let hint = '';
             if (state.enableHint) {
-                hint = getVagueHint(state.category, word);
+                hint = getVagueHint(currentCategory, word);
             }
 
             // Fast Mode Setup
@@ -96,7 +109,7 @@ function gameReducer(state, action) {
             if (state.isNightmareMode) {
                 // 50% chance the Impostor is deceived
                 if (Math.random() > 0.5) {
-                    const categoryObj = CATEGORIES.find(c => c.id === state.category);
+                    const categoryObj = CATEGORIES.find(c => c.id === currentCategory);
                     if (categoryObj) {
                         const otherWords = categoryObj.words.filter(w => w.word !== word);
                         if (otherWords.length > 0) {
@@ -110,6 +123,7 @@ function gameReducer(state, action) {
                 ...state,
                 phase: PHASE.REVEAL,
                 players: newPlayers,
+                currentCategory: currentCategory, // Store the active category for this round
                 secretWord: word || 'Error',
                 impostorHint: hint,
                 currentPlayerIndex: 0,
@@ -216,7 +230,7 @@ function gameReducer(state, action) {
                 playerCount: state.playerCount,
                 impostorCount: state.impostorCount,
                 playerNames: state.playerNames,
-                category: state.category,
+                categories: state.categories,
                 gameMode: state.gameMode,
                 enableHint: state.enableHint,
                 isNightmareMode: state.isNightmareMode

@@ -60,26 +60,29 @@ function SetupScreen() {
                     Category
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-sm)' }}>
-                    {CATEGORIES.map(cat => (
-                        <button
-                            key={cat.id}
-                            onClick={() => dispatch({ type: 'SET_CATEGORY', payload: cat.id })}
-                            style={{
-                                backgroundColor: state.category === cat.id ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
-                                color: 'white',
-                                padding: 'var(--spacing-md)',
-                                borderRadius: 'var(--radius-md)',
-                                fontWeight: '600',
-                                border: state.category === cat.id ? '2px solid white' : '2px solid transparent',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '8px'
-                            }}
-                        >
-                            {cat.name}
-                        </button>
-                    ))}
+                    {CATEGORIES.map(cat => {
+                        const isSelected = state.categories.includes(cat.id);
+                        return (
+                            <button
+                                key={cat.id}
+                                onClick={() => dispatch({ type: 'TOGGLE_CATEGORY', payload: cat.id })}
+                                style={{
+                                    backgroundColor: isSelected ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
+                                    color: 'white',
+                                    padding: 'var(--spacing-md)',
+                                    borderRadius: 'var(--radius-md)',
+                                    fontWeight: '600',
+                                    border: isSelected ? '2px solid white' : '2px solid transparent',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                {cat.name}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
