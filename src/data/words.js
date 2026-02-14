@@ -38,7 +38,7 @@ export const CATEGORIES = [
       { word: "Lettuce", hint: "Leafy green" }, { word: "Tomato", hint: "Fruit/Vegetable" }, { word: "Cucumber", hint: "Vegetable" },
       { word: "Pickle", hint: "Preserved food" }, { word: "Onion", hint: "Vegetable" }, { word: "Garlic", hint: "Flavoring" },
       { word: "Mushroom", hint: "Fungus" }, { word: "Apple", hint: "Fruit" }, { word: "Banana", hint: "Fruit" },
-      { word: "Orange", hint: "Citrus" }, { word: "Grape", hint: "Fruit" }, { word: "Strawberry", hint: "Berry" },
+      { word: "Orange", hint: "Citrus" }, { word: "Grape", hint: "Fruit" }, { word: "Strawberry", hint: "Fruit" },
       { word: "Watermelon", hint: "Melon" }, { word: "Pineapple", hint: "Tropical fruit" }, { word: "Lemon", hint: "Citrus" }
     ]
   },

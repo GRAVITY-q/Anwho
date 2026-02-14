@@ -6,6 +6,8 @@ import CluePhase from './components/CluePhase';
 import DiscussionPhase from './components/DiscussionPhase';
 import VotingPhase from './components/VotingPhase';
 import ResultScreen from './components/ResultScreen'; // For game over or round result
+import { db } from "./lib/firebase";
+import { Analytics } from "@vercel/analytics/react"
 import './index.css';
 
 function GameContainer() {
@@ -43,6 +45,8 @@ function GameContainer() {
 }
 
 function App() {
+  console.log("🔥 Firestore connected:", db);
+
   return (
     <GameProvider>
       <GameContainer />

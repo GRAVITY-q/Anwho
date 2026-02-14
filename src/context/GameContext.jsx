@@ -224,13 +224,14 @@ function gameReducer(state, action) {
             return { ...state, players: updatedPlayers, phase: PHASE.CLUE, currentPlayerIndex: 0, votes: {} };
 
         case 'RESET_GAME':
+            console.log("Resetting game! robustly saving:", state.playerNames);
             return {
                 ...initialState,
                 // Keep settings that usually persist
                 playerCount: state.playerCount,
                 impostorCount: state.impostorCount,
-                playerNames: state.playerNames,
-                categories: state.categories,
+                playerNames: { ...state.playerNames }, // Create fresh copy of names
+                categories: [...state.categories], // Be safe with arrays too
                 gameMode: state.gameMode,
                 enableHint: state.enableHint,
                 isNightmareMode: state.isNightmareMode
