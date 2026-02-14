@@ -50,6 +50,7 @@ function App() {
   return (
     <GameProvider>
       <GameContainer />
+      <Analytics />
     </GameProvider>
   );
 }
