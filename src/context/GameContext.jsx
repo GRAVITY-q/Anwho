@@ -37,6 +37,7 @@ const initialState = {
     fastModeSetup: { startPlayerIndex: 0, direction: 'Clockwise' },
     isNightmareMode: false,
     fakeWord: null, // For Nightmare mode: If set, Impostor sees this instead of "Impostor" label
+    impostorHistory: {}, // { playerId: count } - tracks how many times someone has been impostor
 };
 
 const GameContext = createContext();
@@ -52,6 +53,21 @@ function gameReducer(state, action) {
                 ...state,
                 playerNames: { ...state.playerNames, [action.payload.id]: action.payload.name }
             };
+        case 'SWAP_PLAYER_NAMES':
+            const { id1, id2 } = action.payload;
+            const newNames = { ...state.playerNames };
+            // Swap values
+            const val1 = newNames[id1];
+            const val2 = newNames[id2];
+
+            // Handle undefined cases (if name wasn't set yet)
+            if (val1 === undefined) delete newNames[id2];
+            else newNames[id2] = val1;
+
+            if (val2 === undefined) delete newNames[id1];
+            else newNames[id1] = val2;
+
+            return { ...state, playerNames: newNames };
         case 'TOGGLE_CATEGORY':
             const categoryId = action.payload;
             const isSelected = state.categories.includes(categoryId);
@@ -80,13 +96,41 @@ function gameReducer(state, action) {
                 isEliminated: false,
             }));
 
-            // Randomly assign impostors
-            let assignedImpostors = 0;
-            while (assignedImpostors < state.impostorCount) {
-                const randomIndex = Math.floor(Math.random() * newPlayers.length);
-                if (newPlayers[randomIndex].role === ROLE.CREW) {
-                    newPlayers[randomIndex].role = ROLE.IMPOSTOR;
-                    assignedImpostors++;
+            // Assign Impostors with "Bad Luck Protection"
+            let assignedCount = 0;
+            const tempHistory = { ...state.impostorHistory };
+
+            while (assignedCount < state.impostorCount) {
+                const eligiblePlayers = newPlayers.filter(p => p.role === ROLE.CREW);
+                if (eligiblePlayers.length === 0) break;
+
+                // Calculate weights: 1 / (times_been_impostor + 1)
+                let totalWeight = 0;
+                const candidates = eligiblePlayers.map(p => {
+                    const historyCount = tempHistory[p.id] || 0;
+                    const weight = 1 / (historyCount + 1);
+                    totalWeight += weight;
+                    return { id: p.id, weight };
+                });
+
+                // Weighted Random Selection
+                let randomVal = Math.random() * totalWeight;
+                let selectedId = candidates[candidates.length - 1].id;
+
+                for (const item of candidates) {
+                    randomVal -= item.weight;
+                    if (randomVal <= 0) {
+                        selectedId = item.id;
+                        break;
+                    }
+                }
+
+                // Assign Role
+                const playerIndex = newPlayers.findIndex(p => p.id === selectedId);
+                if (playerIndex !== -1) {
+                    newPlayers[playerIndex].role = ROLE.IMPOSTOR;
+                    assignedCount++;
+                    tempHistory[selectedId] = (tempHistory[selectedId] || 0) + 1;
                 }
             }
 
@@ -234,7 +278,8 @@ function gameReducer(state, action) {
                 categories: [...state.categories], // Be safe with arrays too
                 gameMode: state.gameMode,
                 enableHint: state.enableHint,
-                isNightmareMode: state.isNightmareMode
+                isNightmareMode: state.isNightmareMode,
+                impostorHistory: state.impostorHistory || {}
             };
 
         default:

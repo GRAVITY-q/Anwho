@@ -179,8 +179,8 @@ function SetupScreen() {
                         </div>
 
                         <div style={{ overflowY: 'auto', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', paddingRight: '4px' }}>
-                            {Array.from({ length: state.playerCount }, (_, i) => i + 1).map(id => (
-                                <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {Array.from({ length: state.playerCount }, (_, i) => i + 1).map((id, index, arr) => (
+                                <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span style={{ color: 'var(--text-secondary)', width: '24px', fontSize: '0.9rem' }}>{id}.</span>
                                     <input
                                         type="text"
@@ -195,10 +195,46 @@ function SetupScreen() {
                                             color: 'white',
                                             padding: 'var(--spacing-md)',
                                             borderRadius: 'var(--radius-sm)',
-                                            width: '100%',
+                                            flex: 1,
                                             fontSize: 'var(--font-size-base)'
                                         }}
                                     />
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                        {index > 0 && (
+                                            <button
+                                                onClick={() => dispatch({ type: 'SWAP_PLAYER_NAMES', payload: { id1: id, id2: id - 1 } })}
+                                                style={{
+                                                    background: 'rgba(255,255,255,0.1)',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    padding: '2px',
+                                                    cursor: 'pointer',
+                                                    color: 'var(--text-secondary)',
+                                                    display: 'flex'
+                                                }}
+                                                title="Move Up"
+                                            >
+                                                <ChevronUp size={14} />
+                                            </button>
+                                        )}
+                                        {index < arr.length - 1 && (
+                                            <button
+                                                onClick={() => dispatch({ type: 'SWAP_PLAYER_NAMES', payload: { id1: id, id2: id + 1 } })}
+                                                style={{
+                                                    background: 'rgba(255,255,255,0.1)',
+                                                    border: 'none',
+                                                    borderRadius: '4px',
+                                                    padding: '2px',
+                                                    cursor: 'pointer',
+                                                    color: 'var(--text-secondary)',
+                                                    display: 'flex'
+                                                }}
+                                                title="Move Down"
+                                            >
+                                                <ChevronDown size={14} />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>
