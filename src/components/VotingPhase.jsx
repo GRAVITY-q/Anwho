@@ -4,20 +4,55 @@ import { User, AlertTriangle, CheckCircle } from 'lucide-react';
 
 function VotingPhase() {
     const { state, dispatch } = useGame();
-    const [selectedSuspect, setSelectedSuspect] = useState(null);
+    // In Fast Mode, we allow multiple selections (array). In Normal, single selection (string/number).
+    const [selection, setSelection] = useState(state.gameMode === 'fast' ? [] : null);
     const [isReady, setIsReady] = useState(false);
 
     const currentPlayer = state.players[state.currentPlayerIndex];
 
-    const handleConfirmVote = () => {
-        if (selectedSuspect) {
-            if (state.gameMode === 'fast') {
-                dispatch({ type: 'FAST_VOTE', payload: selectedSuspect });
+    const handleSelect = (id) => {
+        if (state.gameMode === 'fast') {
+            let newSelection = Array.isArray(selection) ? [...selection] : [];
+
+            if (id === 'SKIP') {
+                // Skip is exclusive
+                setSelection(['SKIP']);
+                return;
+            }
+
+            // If we previously selected SKIP, clear it
+            if (newSelection.includes('SKIP')) {
+                newSelection = [];
+            }
+
+            if (newSelection.includes(id)) {
+                newSelection = newSelection.filter(item => item !== id);
             } else {
-                dispatch({ type: 'CAST_VOTE', payload: selectedSuspect });
+                newSelection.push(id);
+            }
+            setSelection(newSelection);
+        } else {
+            // Normal mode - single select
+            setSelection(id);
+        }
+    };
+
+    const isSelected = (id) => {
+        if (Array.isArray(selection)) {
+            return selection.includes(id);
+        }
+        return selection === id;
+    };
+
+    const handleConfirmVote = () => {
+        if (selection && (Array.isArray(selection) ? selection.length > 0 : true)) {
+            if (state.gameMode === 'fast') {
+                dispatch({ type: 'FAST_VOTE', payload: selection });
+            } else {
+                dispatch({ type: 'CAST_VOTE', payload: selection });
                 dispatch({ type: 'NEXT_TURN' });
                 setIsReady(false);
-                setSelectedSuspect(null);
+                setSelection(null);
             }
         }
     };
@@ -54,7 +89,9 @@ function VotingPhase() {
     return (
         <div className="center-content fade-in" style={{ justifyContent: 'flex-start', paddingTop: 'var(--spacing-xl)' }}>
             <h2 style={{ marginBottom: 'var(--spacing-lg)', fontSize: 'var(--font-size-2xl)' }}>
-                {state.gameMode === 'fast' ? "Group Vote: Who to Eliminate?" : "Who is the Impostor?"}
+                {state.gameMode === 'fast'
+                    ? "Group Vote: Select Impostor(s)"
+                    : "Who is the Impostor?"}
             </h2>
 
             <div style={{
@@ -69,40 +106,40 @@ function VotingPhase() {
                 {state.players.filter(p => !p.isEliminated).map(player => (
                     <button
                         key={player.id}
-                        onClick={() => setSelectedSuspect(player.id)}
+                        onClick={() => handleSelect(player.id)}
                         disabled={state.gameMode !== 'fast' && player.id === currentPlayer.id}
                         style={{
                             padding: 'var(--spacing-md)',
-                            background: selectedSuspect === player.id
+                            background: isSelected(player.id)
                                 ? 'linear-gradient(135deg, var(--accent-error), #b91c1c)'
                                 : 'rgba(30, 41, 59, 0.6)',
                             color: 'white',
                             borderRadius: 'var(--radius-md)',
-                            border: selectedSuspect === player.id ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                            border: isSelected(player.id) ? '2px solid white' : '1px solid rgba(255,255,255,0.1)',
                             fontWeight: 'bold',
                             fontSize: 'var(--font-size-base)',
                             opacity: (state.gameMode !== 'fast' && player.id === currentPlayer.id) ? 0.5 : 1,
-                            transform: 'scale(1)',
+                            transform: isSelected(player.id) ? 'scale(1.02)' : 'scale(1)',
                             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                            boxShadow: selectedSuspect === player.id ? '0 10px 20px rgba(239, 68, 68, 0.3)' : 'none',
+                            boxShadow: isSelected(player.id) ? '0 10px 20px rgba(239, 68, 68, 0.3)' : 'none',
                             position: 'relative',
                             overflow: 'hidden'
                         }}
                     >
                         {player.name}
-                        {selectedSuspect === player.id && (
+                        {isSelected(player.id) && (
                             <div style={{ position: 'absolute', top: '5px', right: '5px' }}>
-                                <User size={14} />
+                                <CheckCircle size={14} color="white" />
                             </div>
                         )}
                     </button>
                 ))}
 
                 <button
-                    onClick={() => setSelectedSuspect('SKIP')}
+                    onClick={() => handleSelect('SKIP')}
                     style={{
                         padding: 'var(--spacing-md)',
-                        background: selectedSuspect === 'SKIP' ? 'var(--bg-tertiary)' : 'rgba(255,255,255,0.05)',
+                        background: isSelected('SKIP') ? 'var(--bg-tertiary)' : 'rgba(255,255,255,0.05)',
                         color: 'var(--text-secondary)',
                         borderRadius: 'var(--radius-md)',
                         border: '1px solid rgba(255,255,255,0.1)',
@@ -119,12 +156,12 @@ function VotingPhase() {
             <button
                 className="btn-primary"
                 onClick={handleConfirmVote}
-                disabled={!selectedSuspect}
+                disabled={!(selection && (Array.isArray(selection) ? selection.length > 0 : true))}
                 style={{
                     marginTop: 'auto',
                     marginBottom: 'var(--spacing-lg)',
-                    opacity: selectedSuspect ? 1 : 0.5,
-                    transform: selectedSuspect ? 'translateY(0)' : 'translateY(10px)',
+                    opacity: (selection && (Array.isArray(selection) ? selection.length > 0 : true)) ? 1 : 0.5,
+                    transform: (selection && (Array.isArray(selection) ? selection.length > 0 : true)) ? 'translateY(0)' : 'translateY(10px)',
                     transition: 'all 0.3s ease'
                 }}
             >

@@ -214,42 +214,68 @@ function gameReducer(state, action) {
             };
 
         case 'FAST_VOTE':
-            // In Fast Mode, everyone "votes" for the selected suspect to trigger elimination
-            const suspectId = action.payload;
+            // In Fast Mode, everyone "votes" for the selected suspects
+            // payload can now be a single ID or an array of IDs
+            const suspectIds = Array.isArray(action.payload) ? action.payload : [action.payload];
             const fastVotes = {};
-            state.players.forEach(p => {
-                if (!p.isEliminated) {
-                    fastVotes[p.id] = suspectId;
-                }
-            });
+
+            // We'll store the votes as a special key or just assign to first player for now?
+            // Actually, `votes` usually maps voterID -> suspectID.
+            // For simplicity in Fast Mode, let's just use a reserved key 'fast_vote_targets' 
+            // OR just map everyone to the list, but our check logic needs to know.
+
+            // Better approach: Game state should probably store 'accusedIds' for Fast Mode.
+            // But to minimize state changes, let's just make the vote value an array if needed?
+            // Existing logic might break. 
+
+            // Let's rely on ELIMINATE_PLAYER handling arrays? 
+            // No, the UI probably calls FAST_VOTE then transitions to RESULT.
+            // In RESULT, if it's Fast Mode, it shows who was voted.
+
             return {
                 ...state,
-                votes: fastVotes,
+                // We'll store the array directly in a special property if possible, 
+                // or just attach to everyone (though slightly redundant)
+                fastModeVoteTargets: suspectIds,
                 phase: PHASE.RESULT
             };
 
         case 'ELIMINATE_PLAYER':
-            const eliminatedPlayerId = action.payload;
-            let updatedPlayers = state.players;
+            // Payload could be a single ID or an array of IDs
+            const targets = Array.isArray(action.payload) ? action.payload : [action.payload];
+            let updatedPlayers = [...state.players];
+            let caughtImpostorsCount = 0;
+            let wrongVote = false;
 
-            // Only eliminate if valid ID provided (not -1 or null)
-            if (eliminatedPlayerId && eliminatedPlayerId !== -1) {
-                updatedPlayers = state.players.map(p =>
-                    p.id === eliminatedPlayerId ? { ...p, isEliminated: true } : p
-                );
-            }
+            targets.forEach(id => {
+                if (id && id !== -1) {
+                    const pIndex = updatedPlayers.findIndex(p => p.id === id);
+                    if (pIndex !== -1) {
+                        updatedPlayers[pIndex] = { ...updatedPlayers[pIndex], isEliminated: true };
+                        if (updatedPlayers[pIndex].role === ROLE.IMPOSTOR) {
+                            caughtImpostorsCount++;
+                        } else {
+                            wrongVote = true;
+                        }
+                    }
+                }
+            });
 
             // FAST MODE SUDDEN DEATH
             if (state.gameMode === 'fast') {
-                const eliminatedPlayer = updatedPlayers.find(p => p.id === eliminatedPlayerId);
-                // If it was skip or no one eliminated, loop back? Or Impostor wins?
-                // User said: "if we get it right the crew win if wrong then the impostor wins"
-                // Assuming "Wrong" includes Skip or Crew.
+                if (wrongVote) {
+                    // If ANY crewmate was voted out, Impostors win immediately
+                    return { ...state, players: updatedPlayers, phase: PHASE.GAME_OVER, winner: ROLE.IMPOSTOR };
+                }
 
-                if (eliminatedPlayer && eliminatedPlayer.role === ROLE.IMPOSTOR) {
+                // If we are here, all voted players were impostors (or safeguards).
+                // Check if ALL impostors are now eliminated.
+                const remainingImpostors = updatedPlayers.filter(p => !p.isEliminated && p.role === ROLE.IMPOSTOR);
+                if (remainingImpostors.length === 0) {
                     return { ...state, players: updatedPlayers, phase: PHASE.GAME_OVER, winner: ROLE.CREW };
                 } else {
-                    return { ...state, players: updatedPlayers, phase: PHASE.GAME_OVER, winner: ROLE.IMPOSTOR };
+                    // Caught some, but not all. Continue!
+                    return { ...state, players: updatedPlayers, phase: PHASE.CLUE, currentPlayerIndex: 0, votes: {}, fastModeVoteTargets: [] };
                 }
             }
 

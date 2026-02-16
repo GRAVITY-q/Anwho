@@ -5,7 +5,7 @@ import { Trophy, Skull, RotateCcw, ArrowRight, Fingerprint } from 'lucide-react'
 function ResultScreen() {
     const { state, dispatch } = useGame();
     const [displayState, setDisplayState] = useState('calculating'); // calculating, revealed, gameover
-    const [eliminatedPlayer, setEliminatedPlayer] = useState(null);
+    const [eliminatedIds, setEliminatedIds] = useState([]);
     const [voteTally, setVoteTally] = useState({});
 
     useEffect(() => {
@@ -17,6 +17,21 @@ function ResultScreen() {
     }, [state.phase]);
 
     const calculateVotes = () => {
+        // FAST MODE
+        if (state.gameMode === 'fast') {
+            const targets = state.fastModeVoteTargets || [];
+
+            // Clean up SKIPs
+            const validTargets = targets.filter(id => id !== 'SKIP' && id !== null);
+
+            setTimeout(() => {
+                setEliminatedIds(validTargets);
+                setDisplayState('revealed');
+            }, 1500); // Shorter suspense for fast mode
+            return;
+        }
+
+        // NORMAL MODE
         const tally = {};
         Object.values(state.votes).forEach(vote => {
             tally[vote] = (tally[vote] || 0) + 1;
@@ -40,15 +55,9 @@ function ResultScreen() {
 
         // Delay for dramatic effect
         setTimeout(() => {
-            const resultId = (isTie || candidate === 'SKIP' || !candidate) ? -1 : parseInt(candidate);
-
-            if (state.gameMode === 'fast') {
-                // In Fast Mode, go straight to result (Game Over handled by reducer)
-                dispatch({ type: 'ELIMINATE_PLAYER', payload: resultId });
-            } else {
-                setEliminatedPlayer(resultId === -1 ? null : resultId);
-                setDisplayState('revealed');
-            }
+            const resultId = (isTie || candidate === 'SKIP' || !candidate) ? null : parseInt(candidate);
+            setEliminatedIds(resultId ? [resultId] : []);
+            setDisplayState('revealed');
         }, 3000); // 3 seconds suspense
     };
 
@@ -58,11 +67,8 @@ function ResultScreen() {
             return;
         }
 
-        if (eliminatedPlayer) {
-            dispatch({ type: 'ELIMINATE_PLAYER', payload: eliminatedPlayer });
-        } else {
-            dispatch({ type: 'ELIMINATE_PLAYER', payload: -1 });
-        }
+        const payload = eliminatedIds.length > 0 ? eliminatedIds : -1;
+        dispatch({ type: 'ELIMINATE_PLAYER', payload: payload });
     };
 
     const [cycleState, setCycleState] = useState({ text: 'VICTORY', color: 'var(--accent-success)' });
@@ -312,43 +318,63 @@ function ResultScreen() {
             <h1 style={{ marginBottom: 'var(--spacing-xl)', fontSize: 'var(--font-size-3xl)' }}>Vote Results</h1>
 
             <div style={{ marginBottom: 'var(--spacing-2xl)', textAlign: 'center' }}>
-                {eliminatedPlayer ? (
-                    <>
-                        <div style={{
-                            background: 'rgba(239, 68, 68, 0.1)',
-                            borderRadius: '50%',
-                            width: '120px',
-                            height: '120px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            margin: '0 auto var(--spacing-lg) auto',
-                            border: '2px solid var(--accent-error)',
-                            boxShadow: '0 0 30px rgba(239, 68, 68, 0.2)'
-                        }}>
-                            <Skull size={60} color="var(--accent-error)" />
-                        </div>
-                        <h2 style={{ color: 'var(--accent-error)', fontSize: 'var(--font-size-3xl)', marginBottom: 'var(--spacing-xs)' }}>
-                            {state.players.find(p => p.id === eliminatedPlayer)?.name}
-                        </h2>
-                        <p style={{ color: 'var(--text-secondary)' }}>was ejected.</p>
+                {eliminatedIds.length > 0 ? (
+                    <div style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        gap: 'var(--spacing-xl)'
+                    }}>
+                        {eliminatedIds.map(id => {
+                            const player = state.players.find(p => p.id === id);
+                            if (!player) return null;
+                            const isImpostor = player.role === ROLE.IMPOSTOR;
 
-                        <div style={{
-                            marginTop: 'var(--spacing-lg)',
-                            padding: 'var(--spacing-md)',
-                            background: 'rgba(255,255,255,0.05)',
-                            borderRadius: 'var(--radius-md)',
-                            border: '1px solid rgba(255,255,255,0.1)'
-                        }}>
-                            <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', marginBottom: '4px' }}>ROLE REVEAL</p>
-                            <strong style={{
-                                fontSize: 'var(--font-size-2xl)',
-                                color: state.players.find(p => p.id === eliminatedPlayer)?.role === ROLE.IMPOSTOR ? 'var(--accent-error)' : 'var(--accent-success)'
-                            }}>
-                                {state.players.find(p => p.id === eliminatedPlayer)?.role}
-                            </strong>
-                        </div>
-                    </>
+                            return (
+                                <div key={id} className="fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '200px' }}>
+                                    <div style={{
+                                        background: isImpostor ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+                                        borderRadius: '50%',
+                                        width: '120px',
+                                        height: '120px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        marginBottom: 'var(--spacing-md)',
+                                        border: isImpostor ? '2px solid var(--accent-error)' : '2px solid var(--accent-success)',
+                                        boxShadow: isImpostor ? '0 0 30px rgba(239, 68, 68, 0.2)' : '0 0 30px rgba(34, 197, 94, 0.2)'
+                                    }}>
+                                        <Skull size={60} color={isImpostor ? "var(--accent-error)" : "var(--accent-success)"} />
+                                    </div>
+                                    <h2 style={{
+                                        color: isImpostor ? 'var(--accent-error)' : 'var(--accent-success)',
+                                        fontSize: 'var(--font-size-2xl)',
+                                        marginBottom: 'var(--spacing-xs)'
+                                    }}>
+                                        {player.name}
+                                    </h2>
+                                    <p style={{ color: 'var(--text-secondary)' }}>was ejected.</p>
+
+                                    <div style={{
+                                        marginTop: 'var(--spacing-md)',
+                                        padding: 'var(--spacing-md)',
+                                        background: 'rgba(255,255,255,0.05)',
+                                        borderRadius: 'var(--radius-md)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        width: '100%'
+                                    }}>
+                                        <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', marginBottom: '4px' }}>ROLE</p>
+                                        <strong style={{
+                                            fontSize: 'var(--font-size-xl)',
+                                            color: isImpostor ? 'var(--accent-error)' : 'var(--accent-success)'
+                                        }}>
+                                            {player.role}
+                                        </strong>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 ) : (
                     <>
                         <div style={{
@@ -371,7 +397,7 @@ function ResultScreen() {
             </div>
 
             <button className="btn-primary" onClick={handleProceed}>
-                {state.gameMode === 'fast' ? 'See Winner' : 'Next Round'} <ArrowRight size={20} style={{ marginLeft: '8px' }} />
+                Continue <ArrowRight size={20} style={{ marginLeft: '8px' }} />
             </button>
         </div>
     );
