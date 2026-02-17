@@ -300,6 +300,50 @@ export const CATEGORIES = [
       { word: "Caboose", hint: "Train rear" }, { word: "Boxcar", hint: "Freight car" }, { word: "Tanker", hint: "Liquid hauler" },
       { word: "Barge", hint: "Flat boat" }
     ]
+  },
+  {
+    id: 'celebrities',
+    name: 'Celebrities',
+    icon: 'Star',
+    hints: [
+      "Famous personality.", "Seen on TV or movies.", "Has a lot of fans.", "Known worldwide.", "Often in the news."
+    ],
+    words: [
+      { word: "Taylor Swift", hint: "Music Artist" }, { word: "Elon Musk", hint: "Tech Entrepreneur" }, { word: "Donald Trump", hint: "Politician / Business" },
+      { word: "Lionel Messi", hint: "Pro Athlete" }, { word: "Cristiano Ronaldo", hint: "Pro Athlete" }, { word: "Beyoncé", hint: "Music Artist" },
+      { word: "Kim Kardashian", hint: "TV Personality" }, { word: "Dwayne Johnson", hint: "Actor / Wrestler" }, { word: "Tom Cruise", hint: "Hollywood Actor" },
+      { word: "Marilyn Monroe", hint: "Cultural Icon" }, { word: "Michael Jackson", hint: "Music Legend" }, { word: "Elvis Presley", hint: "Music Legend" },
+      { word: "Albert Einstein", hint: "Scientist" }, { word: "Steve Jobs", hint: "Tech Entrepreneur" }, { word: "Bill Gates", hint: "Tech Entrepreneur" },
+      { word: "Mark Zuckerberg", hint: "Tech Entrepreneur" }, { word: "Jeff Bezos", hint: "Business Mogul" }, { word: "Oprah Winfrey", hint: "TV Host" },
+      { word: "Barack Obama", hint: "Politician" }, { word: "Queen Elizabeth II", hint: "Royal Figure" }, { word: "Princess Diana", hint: "Royal Figure" },
+      { word: "Will Smith", hint: "Hollywood Actor" }, { word: "Johnny Depp", hint: "Hollywood Actor" }, { word: "Brad Pitt", hint: "Hollywood Actor" },
+      { word: "Angelina Jolie", hint: "Hollywood Actress" }, { word: "Jennifer Aniston", hint: "Hollywood Actress" }, { word: "Leonardo DiCaprio", hint: "Hollywood Actor" },
+      { word: "Robert Downey Jr.", hint: "Hollywood Actor" }, { word: "Scarlett Johansson", hint: "Hollywood Actress" }, { word: "Chris Hemsworth", hint: "Hollywood Actor" },
+      { word: "Zendaya", hint: "Actress / Singer" }, { word: "Tom Holland", hint: "Hollywood Actor" }, { word: "Justin Bieber", hint: "Pop Singer" },
+      { word: "Ariana Grande", hint: "Pop Singer" }, { word: "Rihanna", hint: "Music Artist" }, { word: "Kanye West", hint: "Rapper / Designer" },
+      { word: "Eminem", hint: "Rapper" }, { word: "Snoop Dogg", hint: "Rapper" }, { word: "Jay-Z", hint: "Rapper / Mogul" },
+      { word: "Drake", hint: "Rapper" }, { word: "Adele", hint: "Singer" }, { word: "Ed Sheeran", hint: "Singer / Songwriter" },
+      { word: "Harry Styles", hint: "Singer" }, { word: "Lady Gaga", hint: "Pop Star" }, { word: "Madonna", hint: "Pop Legend" },
+      { word: "Britney Spears", hint: "Pop Star" }, { word: "Shakira", hint: "Music Artist" }, { word: "Jennifer Lopez", hint: "Performer" },
+      { word: "Selena Gomez", hint: "Singer / Actress" }, { word: "Miley Cyrus", hint: "Music Artist" }, { word: "Michael Jordan", hint: "Sports Legend" },
+      { word: "LeBron James", hint: "Pro Athlete" }, { word: "Kobe Bryant", hint: "Sports Legend" }, { word: "Shaquille O'Neal", hint: "Sports Legend" },
+      { word: "Tiger Woods", hint: "Pro Athlete" }, { word: "Serena Williams", hint: "Pro Athlete" }, { word: "Usain Bolt", hint: "Pro Athlete" },
+      { word: "Muhammad Ali", hint: "Boxing Legend" }, { word: "Mike Tyson", hint: "Boxer" }, { word: "David Beckham", hint: "Pro Athlete" },
+      { word: "Tom Brady", hint: "Pro Athlete" }, { word: "Roger Federer", hint: "Pro Athlete" }, { word: "Rafael Nadal", hint: "Pro Athlete" },
+      { word: "Lewis Hamilton", hint: "Racing Driver" }, { word: "Conor McGregor", hint: "Fighter" }, { word: "Arnold Schwarzenegger", hint: "Actor / Politician" },
+      { word: "Sylvester Stallone", hint: "Action Star" }, { word: "Jackie Chan", hint: "Action Star" }, { word: "Bruce Lee", hint: "Martial Artist" },
+      { word: "Keanu Reeves", hint: "Hollywood Actor" }, { word: "Ryan Reynolds", hint: "Hollywood Actor" }, { word: "Kevin Hart", hint: "Comedian" },
+      { word: "Adam Sandler", hint: "Comedian / Actor" }, { word: "Jim Carrey", hint: "Comedian / Actor" }, { word: "MrBeast", hint: "YouTuber" },
+      { word: "PewDiePie", hint: "YouTuber" }, { word: "Gordon Ramsay", hint: "Celebrity Chef" }, { word: "Walt Disney", hint: "Media Mogul" },
+      { word: "Stephen Hawking", hint: "Scientist" }, { word: "Nikola Tesla", hint: "Inventor" }, { word: "Thomas Edison", hint: "Inventor" },
+      { word: "Abraham Lincoln", hint: "Historical Leader" }, { word: "George Washington", hint: "Historical Leader" }, { word: "John F. Kennedy", hint: "Historical Leader" },
+      { word: "Nelson Mandela", hint: "Activist / Leader" }, { word: "Mahatma Gandhi", hint: "Activist / Leader" }, { word: "Martin Luther King Jr.", hint: "Activist / Leader" },
+      { word: "Mother Teresa", hint: "Religious Figure" }, { word: "Pope Francis", hint: "Religious Leader" }, { word: "Dalai Lama", hint: "Religious Leader" },
+      { word: "Pablo Picasso", hint: "Artist" }, { word: "Vincent van Gogh", hint: "Artist" }, { word: "Leonardo da Vinci", hint: "Artist / Inventor" },
+      { word: "William Shakespeare", hint: "Playwright" }, { word: "J.K. Rowling", hint: "Author" }, { word: "Stephen King", hint: "Author" },
+      { word: "George Lucas", hint: "Filmmaker" }, { word: "Steven Spielberg", hint: "Filmmaker" }, { word: "Stan Lee", hint: "Comic Creator" },
+      { word: "Charlie Chaplin", hint: "Silent Film Star" }
+    ]
   }
 ];
 
