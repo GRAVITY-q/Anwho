@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useGame, PHASE, ROLE } from '../context/GameContext';
-import { Trophy, Skull, RotateCcw, ArrowRight, Fingerprint } from 'lucide-react';
+import { Trophy, Skull, RotateCcw, ArrowRight, Fingerprint, Scale } from 'lucide-react';
 
 function ResultScreen() {
     const { state, dispatch } = useGame();
     const [displayState, setDisplayState] = useState('calculating'); // calculating, revealed, gameover
     const [eliminatedIds, setEliminatedIds] = useState([]);
     const [voteTally, setVoteTally] = useState({});
+    const [tieCandidates, setTieCandidates] = useState(null);
 
     useEffect(() => {
         if (state.phase === PHASE.RESULT) {
@@ -55,6 +56,13 @@ function ResultScreen() {
 
         // Delay for dramatic effect
         setTimeout(() => {
+            if (isTie && state.gameMode === 'interview') {
+                const tied = Object.keys(tally).filter(id => tally[id] === maxVotes).map(id => parseInt(id));
+                setTieCandidates(tied);
+                setDisplayState('tie');
+                return;
+            }
+
             const resultId = (isTie || candidate === 'SKIP' || !candidate) ? null : parseInt(candidate);
             setEliminatedIds(resultId ? [resultId] : []);
             setDisplayState('revealed');
@@ -64,6 +72,11 @@ function ResultScreen() {
     const handleProceed = () => {
         if (state.phase === PHASE.GAME_OVER) {
             dispatch({ type: 'RESET_GAME' });
+            return;
+        }
+
+        if (displayState === 'tie') {
+            dispatch({ type: 'START_TIEBREAKER', payload: tieCandidates });
             return;
         }
 
@@ -132,6 +145,49 @@ function ResultScreen() {
                         }}></div>
                     </>
                 )}
+            </div>
+        );
+    }
+
+    if (displayState === 'tie') {
+        return (
+            <div className="center-content fade-in">
+                <div style={{
+                    background: 'var(--bg-secondary)',
+                    padding: '30px',
+                    borderRadius: '50%',
+                    marginBottom: 'var(--spacing-lg)',
+                    boxShadow: '0 0 30px rgba(255, 255, 255, 0.1)'
+                }}>
+                    <Scale size={64} style={{ color: 'var(--text-accent)' }} />
+                </div>
+                <h1 style={{ marginBottom: 'var(--spacing-md)', fontSize: 'var(--font-size-3xl)' }}>It's a Tie!</h1>
+                <p style={{
+                    marginBottom: 'var(--spacing-xl)',
+                    color: 'var(--text-secondary)',
+                    fontSize: 'var(--font-size-lg)'
+                }}>
+                    Re-voting between tied candidates...
+                </p>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: 'var(--spacing-xl)' }}>
+                    {tieCandidates && tieCandidates.map(id => {
+                        const p = state.players.find(pl => pl.id === id);
+                        if (!p) return null;
+                        return (
+                            <div key={id} style={{
+                                padding: '10px 20px',
+                                background: 'rgba(255,255,255,0.05)',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1px solid rgba(255,255,255,0.1)'
+                            }}>
+                                {p.name}
+                            </div>
+                        );
+                    })}
+                </div>
+                <button className="btn-primary" onClick={handleProceed}>
+                    Start Tie-Breaker <ArrowRight size={20} style={{ marginLeft: '8px' }} />
+                </button>
             </div>
         );
     }

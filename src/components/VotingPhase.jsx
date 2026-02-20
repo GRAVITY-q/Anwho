@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useGame } from '../context/GameContext';
+import { useGame, ROLE } from '../context/GameContext';
 import { User, AlertTriangle, CheckCircle } from 'lucide-react';
 
 function VotingPhase() {
@@ -28,7 +28,22 @@ function VotingPhase() {
             if (newSelection.includes(id)) {
                 newSelection = newSelection.filter(item => item !== id);
             } else {
-                newSelection.push(id);
+                // Limit selection to the number of remaining impostors
+                const remainingImpostorsCount = state.players.filter(p => !p.isEliminated && p.role === ROLE.IMPOSTOR).length;
+
+                if (newSelection.length < remainingImpostorsCount) {
+                    newSelection.push(id);
+                } else {
+                    // Optional: You could replace the oldest selection here if desired, 
+                    // but strict limit prevents accidental votes.
+                    // For better UX, we'll allow replacing the first selection if we are at limit of 1,
+                    // otherwise, just block changes if we are taking multiple. 
+                    // Let's implement strict limit for clarity: "You can only select X players."
+                    // But if count is 1, let's allow toggle behavior (standard radio button feel).
+                    if (remainingImpostorsCount === 1) {
+                        newSelection = [id];
+                    }
+                }
             }
             setSelection(newSelection);
         } else {
@@ -86,11 +101,15 @@ function VotingPhase() {
         );
     }
 
+    const limit = state.gameMode === 'fast'
+        ? state.players.filter(p => !p.isEliminated && p.role === ROLE.IMPOSTOR).length
+        : 1;
+
     return (
         <div className="center-content fade-in" style={{ justifyContent: 'flex-start', paddingTop: 'var(--spacing-xl)' }}>
             <h2 style={{ marginBottom: 'var(--spacing-lg)', fontSize: 'var(--font-size-2xl)' }}>
                 {state.gameMode === 'fast'
-                    ? "Group Vote: Select Impostor(s)"
+                    ? `Group Vote: Select ${limit} Impostor${limit > 1 ? 's' : ''}`
                     : "Who is the Impostor?"}
             </h2>
 
@@ -101,56 +120,67 @@ function VotingPhase() {
                 width: '100%',
                 marginBottom: 'var(--spacing-xl)',
                 overflowY: 'auto',
+                padding: 'var(--spacing-xs)', // Add padding to prevent clipping of scaled items/shadows
                 paddingBottom: '20px'
             }}>
-                {state.players.filter(p => !p.isEliminated).map(player => (
+                {state.players.filter(p => !p.isEliminated).map(player => {
+                    // Tie Breaker Filter
+                    if (state.voteCandidates && !state.voteCandidates.includes(player.id)) {
+                        return null;
+                    }
+
+                    return (
+                        <button
+                            key={player.id}
+                            onClick={() => handleSelect(player.id)}
+                            disabled={state.gameMode !== 'fast' && player.id === currentPlayer.id}
+                            style={{
+                                padding: 'var(--spacing-md)',
+                                background: isSelected(player.id)
+                                    ? 'linear-gradient(135deg, var(--accent-error), #b91c1c)'
+                                    : 'rgba(30, 41, 59, 0.6)',
+                                color: 'white',
+                                borderRadius: 'var(--radius-md)',
+                                border: isSelected(player.id) ? '2px solid white' : '1px solid rgba(255,255,255,0.1)',
+                                fontWeight: 'bold',
+                                fontSize: 'var(--font-size-base)',
+                                opacity: (state.gameMode !== 'fast' && player.id === currentPlayer.id) ? 0.5 : 1,
+                                transform: isSelected(player.id) ? 'scale(1.02)' : 'scale(1)',
+                                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                boxShadow: isSelected(player.id) ? '0 10px 20px rgba(239, 68, 68, 0.3)' : 'none',
+                                position: 'relative',
+                                overflow: 'hidden'
+                            }}
+                        >
+                            {player.name}
+                            {isSelected(player.id) && (
+                                <div style={{ position: 'absolute', top: '5px', right: '5px' }}>
+                                    <CheckCircle size={14} color="white" />
+                                </div>
+                            )}
+                        </button>
+                    );
+                })}
+
+                {/* Hide SKIP button in Interview Mode */}
+                {state.gameMode !== 'interview' && (
                     <button
-                        key={player.id}
-                        onClick={() => handleSelect(player.id)}
-                        disabled={state.gameMode !== 'fast' && player.id === currentPlayer.id}
+                        onClick={() => handleSelect('SKIP')}
                         style={{
                             padding: 'var(--spacing-md)',
-                            background: isSelected(player.id)
-                                ? 'linear-gradient(135deg, var(--accent-error), #b91c1c)'
-                                : 'rgba(30, 41, 59, 0.6)',
-                            color: 'white',
+                            background: isSelected('SKIP') ? 'var(--bg-tertiary)' : 'rgba(255,255,255,0.05)',
+                            color: 'var(--text-secondary)',
                             borderRadius: 'var(--radius-md)',
-                            border: isSelected(player.id) ? '2px solid white' : '1px solid rgba(255,255,255,0.1)',
-                            fontWeight: 'bold',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            fontWeight: '600',
                             fontSize: 'var(--font-size-base)',
-                            opacity: (state.gameMode !== 'fast' && player.id === currentPlayer.id) ? 0.5 : 1,
-                            transform: isSelected(player.id) ? 'scale(1.02)' : 'scale(1)',
-                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                            boxShadow: isSelected(player.id) ? '0 10px 20px rgba(239, 68, 68, 0.3)' : 'none',
-                            position: 'relative',
-                            overflow: 'hidden'
+                            gridColumn: '1 / -1',
+                            letterSpacing: '0.05em'
                         }}
                     >
-                        {player.name}
-                        {isSelected(player.id) && (
-                            <div style={{ position: 'absolute', top: '5px', right: '5px' }}>
-                                <CheckCircle size={14} color="white" />
-                            </div>
-                        )}
+                        SKIP VOTE
                     </button>
-                ))}
-
-                <button
-                    onClick={() => handleSelect('SKIP')}
-                    style={{
-                        padding: 'var(--spacing-md)',
-                        background: isSelected('SKIP') ? 'var(--bg-tertiary)' : 'rgba(255,255,255,0.05)',
-                        color: 'var(--text-secondary)',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        fontWeight: '600',
-                        fontSize: 'var(--font-size-base)',
-                        gridColumn: '1 / -1',
-                        letterSpacing: '0.05em'
-                    }}
-                >
-                    SKIP VOTE
-                </button>
+                )}
             </div>
 
             <button

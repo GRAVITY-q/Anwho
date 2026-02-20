@@ -1,14 +1,17 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { getRandomWord, getVagueHint, CATEGORIES } from '../data/words';
+import { INTERVIEW_QUESTIONS } from '../data/questions';
 
 // Game Phases
 export const PHASE = {
     SETUP: 'SETUP',
     REVEAL: 'REVEAL',
     CLUE: 'CLUE',
+    INTERVIEW: 'INTERVIEW', // New Phase
     DISCUSSION: 'DISCUSSION',
     VOTE: 'VOTE',
     RESULT: 'RESULT',
+    IMPOSTOR_GUESS: 'IMPOSTOR_GUESS', // New Phase
     GAME_OVER: 'GAME_OVER',
 };
 
@@ -20,24 +23,27 @@ export const ROLE = {
 
 const initialState = {
     phase: PHASE.SETUP,
-    players: [], // Array of { id: 1, name: 'Alice', role: ROLE.CREW, isEliminated: false }
+    players: [],
     playerCount: 4,
     impostorCount: 1,
-    playerNames: {}, // { 1: 'Alice', 2: 'Bob' }
+    playerNames: {},
     categories: ['food'],
-    currentCategory: null, // The category selected for the specific round
+    currentCategory: null,
+    currentQuestion: null,
     secretWord: '',
     currentPlayerIndex: 0,
-    votes: {}, // { voterId: suspectId }
-    winner: null, // ROLE.CREW or ROLE.IMPOSTOR
-    discussionTime: 60, // seconds
-    gameMode: 'fast', // 'normal' | 'fast'
+    votes: {},
+    winner: null,
+    discussionTime: 60,
+    gameMode: 'fast',
     enableHint: true,
     impostorHint: '',
     fastModeSetup: { startPlayerIndex: 0, direction: 'Clockwise' },
     isNightmareMode: false,
-    fakeWord: null, // For Nightmare mode: If set, Impostor sees this instead of "Impostor" label
-    impostorHistory: {}, // { playerId: count } - tracks how many times someone has been impostor
+    fakeWord: null,
+    impostorHistory: {},
+    interviewRound: 1, // New State
+    impostorGuessOptions: [], // New State
 };
 
 const GameContext = createContext();
@@ -56,25 +62,18 @@ function gameReducer(state, action) {
         case 'SWAP_PLAYER_NAMES':
             const { id1, id2 } = action.payload;
             const newNames = { ...state.playerNames };
-            // Swap values
             const val1 = newNames[id1];
             const val2 = newNames[id2];
-
-            // Handle undefined cases (if name wasn't set yet)
             if (val1 === undefined) delete newNames[id2];
             else newNames[id2] = val1;
-
             if (val2 === undefined) delete newNames[id1];
             else newNames[id1] = val2;
-
             return { ...state, playerNames: newNames };
         case 'TOGGLE_CATEGORY':
             const categoryId = action.payload;
             const isSelected = state.categories.includes(categoryId);
             let newCategories;
-
             if (isSelected) {
-                // Prevent removing the last category
                 if (state.categories.length <= 1) return state;
                 newCategories = state.categories.filter(id => id !== categoryId);
             } else {
@@ -104,7 +103,6 @@ function gameReducer(state, action) {
                 const eligiblePlayers = newPlayers.filter(p => p.role === ROLE.CREW);
                 if (eligiblePlayers.length === 0) break;
 
-                // Calculate weights: 1 / (times_been_impostor + 1)
                 let totalWeight = 0;
                 const candidates = eligiblePlayers.map(p => {
                     const historyCount = tempHistory[p.id] || 0;
@@ -113,7 +111,6 @@ function gameReducer(state, action) {
                     return { id: p.id, weight };
                 });
 
-                // Weighted Random Selection
                 let randomVal = Math.random() * totalWeight;
                 let selectedId = candidates[candidates.length - 1].id;
 
@@ -125,7 +122,6 @@ function gameReducer(state, action) {
                     }
                 }
 
-                // Assign Role
                 const playerIndex = newPlayers.findIndex(p => p.id === selectedId);
                 if (playerIndex !== -1) {
                     newPlayers[playerIndex].role = ROLE.IMPOSTOR;
@@ -151,7 +147,6 @@ function gameReducer(state, action) {
             // Nightmare Mode Logic
             let fakeWord = null;
             if (state.isNightmareMode) {
-                // 50% chance the Impostor is deceived
                 if (Math.random() > 0.5) {
                     const categoryObj = CATEGORIES.find(c => c.id === currentCategory);
                     if (categoryObj) {
@@ -167,39 +162,83 @@ function gameReducer(state, action) {
                 ...state,
                 phase: PHASE.REVEAL,
                 players: newPlayers,
-                currentCategory: currentCategory, // Store the active category for this round
+                currentCategory: currentCategory,
                 secretWord: word || 'Error',
                 impostorHint: hint,
                 currentPlayerIndex: 0,
                 votes: {},
                 winner: null,
                 fastModeSetup: { startPlayerIndex: startIdx, direction },
-                fakeWord: fakeWord
+                fakeWord: fakeWord,
+                currentQuestion: null,
+                interviewRound: 1,
+                impostorGuessOptions: [],
+                voteCandidates: null // Reset
+            };
+
+        case 'START_TIEBREAKER':
+            return {
+                ...state,
+                phase: PHASE.VOTE,
+                votes: {},
+                voteCandidates: action.payload, // Array of player IDs
+                currentPlayerIndex: 0
             };
 
         case 'NEXT_REVEAL':
             if (state.currentPlayerIndex + 1 >= state.players.length) {
+                if (state.gameMode === 'interview') {
+                    // Start Interview Phase
+                    const firstQ = INTERVIEW_QUESTIONS[Math.floor(Math.random() * INTERVIEW_QUESTIONS.length)];
+                    return { ...state, phase: PHASE.INTERVIEW, currentPlayerIndex: 0, interviewRound: 1, currentQuestion: firstQ };
+                }
                 return { ...state, phase: PHASE.CLUE, currentPlayerIndex: 0 };
             }
             return { ...state, currentPlayerIndex: state.currentPlayerIndex + 1 };
 
-        case 'NEXT_TURN': // For Clue and Vote phases
-            // Find next non-eliminated player
+        case 'NEXT_TURN':
+            // Logic for finding next player
             let nextIndex = state.currentPlayerIndex + 1;
+
+            // For INTERVIEW phase, we iterate through ALL players (even eliminated? No, usually voting removes them, but interview implies active players). 
+            // Standard check:
             while (nextIndex < state.players.length && state.players[nextIndex].isEliminated) {
                 nextIndex++;
             }
 
-            // If we looked through everyone and found no one, or reached end
+            // End of list reached?
             if (nextIndex >= state.players.length) {
                 if (state.phase === PHASE.CLUE) {
                     return { ...state, phase: PHASE.DISCUSSION };
                 } else if (state.phase === PHASE.VOTE) {
-                    return { ...state, phase: PHASE.RESULT }; // Process votes logic needed here or in separate calculation
+                    return { ...state, phase: PHASE.RESULT };
+                } else if (state.phase === PHASE.INTERVIEW) {
+                    // Check rounds
+                    if (state.interviewRound < 2) {
+                        // Start Round 2
+                        const nextQ = INTERVIEW_QUESTIONS[Math.floor(Math.random() * INTERVIEW_QUESTIONS.length)];
+                        return {
+                            ...state,
+                            interviewRound: state.interviewRound + 1,
+                            currentPlayerIndex: 0,
+                            currentQuestion: nextQ
+                        };
+                    } else {
+                        // End of Round 2 -> Go to Vote
+                        return { ...state, phase: PHASE.VOTE, currentPlayerIndex: 0 };
+                    }
                 }
             }
 
-            return { ...state, currentPlayerIndex: nextIndex };
+            // Just moving to next player
+            let updateState = { ...state, currentPlayerIndex: nextIndex };
+
+            // If Interview, select NEW Question for next player
+            if (state.phase === PHASE.INTERVIEW) {
+                updateState.currentQuestion = INTERVIEW_QUESTIONS[Math.floor(Math.random() * INTERVIEW_QUESTIONS.length)];
+            }
+
+            return updateState;
 
         case 'START_DISCUSSION':
             return { ...state, phase: PHASE.DISCUSSION };
@@ -214,34 +253,14 @@ function gameReducer(state, action) {
             };
 
         case 'FAST_VOTE':
-            // In Fast Mode, everyone "votes" for the selected suspects
-            // payload can now be a single ID or an array of IDs
             const suspectIds = Array.isArray(action.payload) ? action.payload : [action.payload];
-            const fastVotes = {};
-
-            // We'll store the votes as a special key or just assign to first player for now?
-            // Actually, `votes` usually maps voterID -> suspectID.
-            // For simplicity in Fast Mode, let's just use a reserved key 'fast_vote_targets' 
-            // OR just map everyone to the list, but our check logic needs to know.
-
-            // Better approach: Game state should probably store 'accusedIds' for Fast Mode.
-            // But to minimize state changes, let's just make the vote value an array if needed?
-            // Existing logic might break. 
-
-            // Let's rely on ELIMINATE_PLAYER handling arrays? 
-            // No, the UI probably calls FAST_VOTE then transitions to RESULT.
-            // In RESULT, if it's Fast Mode, it shows who was voted.
-
             return {
                 ...state,
-                // We'll store the array directly in a special property if possible, 
-                // or just attach to everyone (though slightly redundant)
                 fastModeVoteTargets: suspectIds,
                 phase: PHASE.RESULT
             };
 
         case 'ELIMINATE_PLAYER':
-            // Payload could be a single ID or an array of IDs
             const targets = Array.isArray(action.payload) ? action.payload : [action.payload];
             let updatedPlayers = [...state.players];
             let caughtImpostorsCount = 0;
@@ -261,25 +280,42 @@ function gameReducer(state, action) {
                 }
             });
 
-            // FAST MODE SUDDEN DEATH
+            // FAST MODE SUDDEN DEATH Logic
             if (state.gameMode === 'fast') {
                 if (wrongVote) {
-                    // If ANY crewmate was voted out, Impostors win immediately
                     return { ...state, players: updatedPlayers, phase: PHASE.GAME_OVER, winner: ROLE.IMPOSTOR };
                 }
-
-                // If we are here, all voted players were impostors (or safeguards).
-                // Check if ALL impostors are now eliminated.
                 const remainingImpostors = updatedPlayers.filter(p => !p.isEliminated && p.role === ROLE.IMPOSTOR);
                 if (remainingImpostors.length === 0) {
                     return { ...state, players: updatedPlayers, phase: PHASE.GAME_OVER, winner: ROLE.CREW };
                 } else {
-                    // Caught some, but not all. Continue!
                     return { ...state, players: updatedPlayers, phase: PHASE.CLUE, currentPlayerIndex: 0, votes: {}, fastModeVoteTargets: [] };
                 }
             }
 
-            // Check Win Condition (Normal Mode)
+            // INTERVIEW / NORMAL MODE Logic
+            // INTERVIEW MODE Logic
+            if (state.gameMode === 'interview') {
+                // Always go to Impostor Guess, regardless of who was voted out
+                const categoryObj = CATEGORIES.find(c => c.id === state.currentCategory);
+                const allWords = categoryObj ? categoryObj.words.map(w => w.word) : [];
+                const otherWords = allWords.filter(w => w !== state.secretWord);
+                const decoys = otherWords.sort(() => 0.5 - Math.random()).slice(0, 5); // 5 decoys + 1 real = 6 options
+                const options = [...decoys, state.secretWord].sort(() => 0.5 - Math.random());
+
+                // Find who was eliminated for context
+                const eliminatedPlayer = updatedPlayers.find(p => targets.includes(p.id));
+
+                return {
+                    ...state,
+                    players: updatedPlayers,
+                    phase: PHASE.IMPOSTOR_GUESS,
+                    impostorGuessOptions: options,
+                    winner: null,
+                    eliminatedId: eliminatedPlayer ? eliminatedPlayer.id : null
+                };
+            }
+
             const activeImpostors = updatedPlayers.filter(p => !p.isEliminated && p.role === ROLE.IMPOSTOR);
             const activeCrew = updatedPlayers.filter(p => !p.isEliminated && p.role === ROLE.CREW);
 
@@ -290,18 +326,31 @@ function gameReducer(state, action) {
                 return { ...state, players: updatedPlayers, phase: PHASE.GAME_OVER, winner: ROLE.IMPOSTOR };
             }
 
-            // If no win, go back to Clue phase for next round
-            return { ...state, players: updatedPlayers, phase: PHASE.CLUE, currentPlayerIndex: 0, votes: {} };
+            // Continue Game
+            let nextQuestion = state.currentQuestion;
+            if (state.gameMode === 'interview') {
+                nextQuestion = INTERVIEW_QUESTIONS[Math.floor(Math.random() * INTERVIEW_QUESTIONS.length)];
+            }
+            return { ...state, players: updatedPlayers, phase: state.gameMode === 'interview' ? PHASE.INTERVIEW : PHASE.CLUE, currentPlayerIndex: 0, votes: {}, currentQuestion: nextQuestion, interviewRound: 1 };
+
+        case 'IMPOSTOR_GUESS':
+            const guessedWord = action.payload;
+            if (guessedWord === state.secretWord) {
+                // Impostor Guessed Correctly -> Steal Win
+                return { ...state, phase: PHASE.GAME_OVER, winner: ROLE.IMPOSTOR };
+            } else {
+                // Wrong Guess -> Crew Wins (since they already voted Impostor out)
+                return { ...state, phase: PHASE.GAME_OVER, winner: ROLE.CREW };
+            }
 
         case 'RESET_GAME':
             console.log("Resetting game! robustly saving:", state.playerNames);
             return {
                 ...initialState,
-                // Keep settings that usually persist
                 playerCount: state.playerCount,
                 impostorCount: state.impostorCount,
-                playerNames: { ...state.playerNames }, // Create fresh copy of names
-                categories: [...state.categories], // Be safe with arrays too
+                playerNames: { ...state.playerNames },
+                categories: [...state.categories],
                 gameMode: state.gameMode,
                 enableHint: state.enableHint,
                 isNightmareMode: state.isNightmareMode,

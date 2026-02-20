@@ -6,6 +6,8 @@ import CluePhase from './components/CluePhase';
 import DiscussionPhase from './components/DiscussionPhase';
 import VotingPhase from './components/VotingPhase';
 import ResultScreen from './components/ResultScreen'; // For game over or round result
+import InterviewPhase from './components/InterviewPhase';
+import ImpostorGuessPhase from './components/ImpostorGuessPhase';
 import { db } from "./lib/firebase";
 import { Analytics } from "@vercel/analytics/react"
 import './index.css';
@@ -22,6 +24,8 @@ function GameContainer() {
         return <RevealPhase />;
       case PHASE.CLUE:
         return <CluePhase />;
+      case PHASE.INTERVIEW:
+        return <InterviewPhase />;
       case PHASE.DISCUSSION:
         return <DiscussionPhase />;
       case PHASE.VOTE:
@@ -29,6 +33,8 @@ function GameContainer() {
       case PHASE.RESULT:
       case PHASE.GAME_OVER:
         return <ResultScreen />;
+      case PHASE.IMPOSTOR_GUESS:
+        return <ImpostorGuessPhase />;
       default:
         return <div className="center-content">Unknown Phase</div>;
     }

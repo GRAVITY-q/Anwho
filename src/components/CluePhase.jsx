@@ -18,9 +18,18 @@ function CluePhase() {
 
     return (
         <div className="center-content fade-in">
-            <h1 style={{ marginBottom: 'var(--spacing-lg)', fontSize: 'var(--font-size-3xl)' }}>Game On!</h1>
+            <h1 style={{ marginBottom: 'var(--spacing-lg)', fontSize: 'var(--font-size-3xl)' }}>
+                Game On!
+            </h1>
 
             <div className="card">
+                <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>Category</p>
+                    <p style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent-primary)' }}>
+                        {CATEGORIES.find(c => c.id === state.currentCategory)?.name || state.currentCategory}
+                    </p>
+                </div>
+
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>Start with</p>
                 <h2 style={{ fontSize: 'var(--font-size-2xl)', color: 'var(--accent-primary)', marginBottom: 'var(--spacing-lg)' }}>
                     {startPlayer.name}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGame, ROLE } from '../context/GameContext';
 import { CATEGORIES } from '../data/words';
-import { Users, UserX, Play, Zap, Lightbulb, Ghost, ChevronDown, ChevronUp, X, Check } from 'lucide-react';
+import { Users, UserX, Play, Zap, Lightbulb, Ghost, ChevronDown, ChevronUp, X, Check, MessageSquare } from 'lucide-react';
 
 function SetupScreen() {
     const { state, dispatch } = useGame();
@@ -22,6 +22,43 @@ function SetupScreen() {
         const newCount = Math.max(1, Math.min(maxImpostors, state.impostorCount + delta));
         dispatch({ type: 'SET_IMPOSTOR_COUNT', payload: newCount });
     };
+
+    const toggleGameMode = () => {
+        const modes = ['normal', 'fast', 'interview'];
+        const nextIndex = (modes.indexOf(state.gameMode) + 1) % modes.length;
+        dispatch({ type: 'SET_GAME_MODE', payload: modes[nextIndex] });
+    };
+
+    const getModeInfo = () => {
+        switch (state.gameMode) {
+            case 'fast':
+                return {
+                    icon: <Zap size={20} color="var(--accent-primary)" />,
+                    label: 'Fast Mode',
+                    desc: 'Group votes together. Quick & intense.',
+                    color: 'var(--accent-primary)',
+                    pos: '29px'
+                };
+            case 'interview':
+                return {
+                    icon: <MessageSquare size={20} color="#f59e0b" />,
+                    label: 'Interview Mode',
+                    desc: 'Answer specific questions. Structured checking.',
+                    color: '#f59e0b',
+                    pos: '54px'
+                };
+            default: // normal
+                return {
+                    icon: <Users size={20} color="var(--accent-secondary)" />,
+                    label: 'Strategic Mode',
+                    desc: 'Pass device to vote. Deep deduction.',
+                    color: 'var(--bg-tertiary)',
+                    pos: '4px'
+                };
+        }
+    };
+
+    const modeInfo = getModeInfo();
 
     const startGame = () => {
         dispatch({ type: 'START_GAME' });
@@ -259,14 +296,14 @@ function SetupScreen() {
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--spacing-md)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {state.gameMode === 'fast' ? <Zap size={20} color="var(--accent-primary)" /> : <Users size={20} color="var(--accent-secondary)" />}
-                        <span>{state.gameMode === 'fast' ? 'Fast Mode' : 'Strategic Mode'}</span>
+                        {modeInfo.icon}
+                        <span>{modeInfo.label}</span>
                     </div>
                     <button
-                        onClick={() => dispatch({ type: 'SET_GAME_MODE', payload: state.gameMode === 'normal' ? 'fast' : 'normal' })}
+                        onClick={toggleGameMode}
                         style={{
-                            background: state.gameMode === 'fast' ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
-                            width: '50px',
+                            background: 'var(--bg-tertiary)',
+                            width: '78px',
                             height: '28px',
                             borderRadius: '14px',
                             position: 'relative',
@@ -277,18 +314,19 @@ function SetupScreen() {
                     >
                         <div style={{
                             position: 'absolute',
-                            left: state.gameMode === 'fast' ? '24px' : '4px',
+                            left: modeInfo.pos,
                             top: '4px',
                             width: '20px',
                             height: '20px',
                             borderRadius: '50%',
-                            background: 'white',
-                            transition: 'all 0.3s ease'
+                            background: modeInfo.color === 'var(--bg-tertiary)' ? 'var(--text-secondary)' : modeInfo.color,
+                            transition: 'all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)',
+                            boxShadow: '0 0 5px rgba(0,0,0,0.5)'
                         }} />
                     </button>
                 </div>
                 <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', marginBottom: 'var(--spacing-lg)', marginTop: '-8px' }}>
-                    {state.gameMode === 'fast' ? 'Group votes together. Quick & intense.' : 'Pass device to vote. Deep deduction.'}
+                    {modeInfo.desc}
                 </p>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--spacing-md)' }}>
