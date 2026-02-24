@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
 import { MessageSquare, User } from 'lucide-react';
+import { CATEGORIES } from '../data/words';
 
 function CluePhase() {
     const { state, dispatch } = useGame();
