@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useGame, ROLE } from '../context/GameContext';
 import { Eye, User, Fingerprint } from 'lucide-react';
-import GlassButton from './GlassButton';
 
 function RevealPhase() {
     const { state, dispatch } = useGame();
@@ -29,7 +28,7 @@ function RevealPhase() {
                     padding: '40px',
                     borderRadius: '50%',
                     marginBottom: 'var(--spacing-xl)',
-                    boxShadow: '0 0 30px rgba(255, 255, 255, 0.05)'
+                    boxShadow: '0 0 30px rgba(99, 102, 241, 0.1)'
                 }}>
                     <User size={64} style={{ color: 'var(--text-accent)' }} />
                 </div>
@@ -45,9 +44,9 @@ function RevealPhase() {
                     {currentPlayer.name}
                 </h1>
 
-                <GlassButton variant="primary" onClick={() => setIsReady(true)} style={{ marginTop: '75px' }}>
+                <button className="btn-primary" onClick={() => setIsReady(true)} style={{ marginTop: '75px' }}>
                     I am {currentPlayer.name}
-                </GlassButton>
+                </button>
             </div>
         );
     }
@@ -102,9 +101,9 @@ function RevealPhase() {
             </div>
 
             {isFlipped && (
-                <GlassButton variant="primary" onClick={handleCreateNext} style={{ marginTop: '0', maxWidth: '300px' }}>
+                <button className="btn-primary" onClick={handleCreateNext} style={{ marginTop: '0', maxWidth: '300px', background: 'white', color: 'black' }}>
                     GOT IT
-                </GlassButton>
+                </button>
             )}
         </div>
     );

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useGame, ROLE } from '../context/GameContext';
 import { User, AlertTriangle, CheckCircle } from 'lucide-react';
-import GlassButton from './GlassButton';
 
 function VotingPhase() {
     const { state, dispatch } = useGame();
@@ -81,7 +80,7 @@ function VotingPhase() {
                     padding: '30px',
                     borderRadius: '50%',
                     marginBottom: 'var(--spacing-lg)',
-                    boxShadow: '0 0 30px rgba(255, 255, 255, 0.08)'
+                    boxShadow: '0 0 30px rgba(99, 102, 241, 0.15)'
                 }}>
                     <User size={64} style={{ color: 'var(--text-accent)' }} />
                 </div>
@@ -95,9 +94,9 @@ function VotingPhase() {
                 }}>
                     {currentPlayer.name}
                 </h1>
-                <GlassButton variant="primary" onClick={() => setIsReady(true)}>
+                <button className="btn-primary" onClick={() => setIsReady(true)}>
                     I am {currentPlayer.name}
-                </GlassButton>
+                </button>
             </div>
         );
     }
@@ -184,8 +183,8 @@ function VotingPhase() {
                 )}
             </div>
 
-            <GlassButton
-                variant="primary"
+            <button
+                className="btn-primary"
                 onClick={handleConfirmVote}
                 disabled={!(selection && (Array.isArray(selection) ? selection.length > 0 : true))}
                 style={{
@@ -197,7 +196,7 @@ function VotingPhase() {
                 }}
             >
                 Confirm Vote <CheckCircle size={20} style={{ marginLeft: '8px' }} />
-            </GlassButton>
+            </button>
         </div>
     );
 }

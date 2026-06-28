@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useGame } from '../context/GameContext';
 import { MessageSquare, ArrowRight, User } from 'lucide-react';
-import GlassButton from './GlassButton';
 
 function InterviewPhase() {
     const { state, dispatch } = useGame();
@@ -76,8 +75,8 @@ function InterviewPhase() {
                     </p>
                 </div>
 
-                <GlassButton
-                    variant="primary"
+                <button
+                    className="btn-primary"
                     onClick={handleNext}
                     disabled={isThinking}
                     style={{ width: '100%' }}
@@ -87,7 +86,7 @@ function InterviewPhase() {
                             Next Player <ArrowRight size={20} />
                         </div>
                     )}
-                </GlassButton>
+                </button>
             </div>
 
             <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-md)' }}>

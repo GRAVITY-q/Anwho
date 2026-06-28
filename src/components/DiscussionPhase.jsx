@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '../context/GameContext';
 import { Timer, Users, Vote } from 'lucide-react';
-import GlassButton from './GlassButton';
 
 function DiscussionPhase() {
     const { state, dispatch } = useGame();
@@ -78,9 +77,9 @@ function DiscussionPhase() {
                 Identify the Impostor before time runs out!
             </p>
 
-            <GlassButton variant="primary" onClick={handleStartVoting}>
+            <button className="btn-primary" onClick={handleStartVoting}>
                 {state.gameMode === 'fast' ? 'ELIMINATE' : 'Start Voting'} <Vote size={20} style={{ marginLeft: '8px' }} />
-            </GlassButton>
+            </button>
         </div>
     );
 }

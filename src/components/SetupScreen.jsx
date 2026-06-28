@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useGame, ROLE } from '../context/GameContext';
 import { CATEGORIES } from '../data/words';
 import { Users, UserX, Play, Zap, Lightbulb, Ghost, ChevronDown, ChevronUp, X, Check, MessageSquare } from 'lucide-react';
-import GlassButton from './GlassButton';
 
 function SetupScreen() {
     const { state, dispatch } = useGame();
@@ -74,24 +73,24 @@ function SetupScreen() {
                     Players
                 </label>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--spacing-lg)' }}>
-                    <GlassButton variant="secondary" style={{ width: '50px', height: '40px' }} onClick={() => handlePlayerCountChange(-1)}>-</GlassButton>
+                    <button className="btn-secondary" style={{ width: '50px' }} onClick={() => handlePlayerCountChange(-1)}>-</button>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)', fontSize: 'var(--font-size-xl)', fontWeight: 'bold' }}>
                         <Users size={24} />
                         {state.playerCount}
                     </div>
-                    <GlassButton variant="secondary" style={{ width: '50px', height: '40px' }} onClick={() => handlePlayerCountChange(1)}>+</GlassButton>
+                    <button className="btn-secondary" style={{ width: '50px' }} onClick={() => handlePlayerCountChange(1)}>+</button>
                 </div>
 
                 <label style={{ display: 'block', marginBottom: 'var(--spacing-sm)', color: 'var(--text-secondary)' }}>
                     Impostors
                 </label>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--spacing-lg)' }}>
-                    <GlassButton variant="secondary" style={{ width: '50px', height: '40px' }} onClick={() => handleImpostorCountChange(-1)}>-</GlassButton>
+                    <button className="btn-secondary" style={{ width: '50px' }} onClick={() => handleImpostorCountChange(-1)}>-</button>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)', fontSize: 'var(--font-size-xl)', fontWeight: 'bold', color: 'var(--accent-error)' }}>
                         <UserX size={24} />
                         {state.impostorCount}
                     </div>
-                    <GlassButton variant="secondary" style={{ width: '50px', height: '40px' }} onClick={() => handleImpostorCountChange(1)}>+</GlassButton>
+                    <button className="btn-secondary" style={{ width: '50px' }} onClick={() => handleImpostorCountChange(1)}>+</button>
                 </div>
 
                 <label style={{ display: 'block', marginBottom: 'var(--spacing-sm)', color: 'var(--text-secondary)' }}>
@@ -106,7 +105,7 @@ function SetupScreen() {
                                 onClick={() => dispatch({ type: 'TOGGLE_CATEGORY', payload: cat.id })}
                                 style={{
                                     backgroundColor: isSelected ? 'var(--accent-primary)' : 'var(--bg-tertiary)',
-                                    color: isSelected ? 'var(--bg-primary)' : 'var(--text-primary)',
+                                    color: 'white',
                                     padding: 'var(--spacing-md)',
                                     borderRadius: 'var(--radius-md)',
                                     fontWeight: '600',
@@ -277,15 +276,15 @@ function SetupScreen() {
                             ))}
                         </div>
 
-                        <GlassButton
-                            variant="primary"
+                        <button
+                            className="btn-primary"
                             onClick={() => setIsNamesExpanded(false)}
                             style={{ marginTop: 'var(--spacing-lg)' }}
                         >
                             <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                 <Check size={20} /> Done
                             </span>
-                        </GlassButton>
+                        </button>
                     </div>
                 </div>
             )}
@@ -309,14 +308,14 @@ function SetupScreen() {
                             borderRadius: '14px',
                             position: 'relative',
                             transition: 'all 0.3s ease',
-                            border: '1.5px solid rgba(255, 255, 255, 0.25)',
+                            border: 'none',
                             cursor: 'pointer'
                         }}
                     >
                         <div style={{
                             position: 'absolute',
-                            left: modeInfo.pos === '4px' ? '3px' : modeInfo.pos === '29px' ? '28px' : '52px',
-                            top: '3px',
+                            left: modeInfo.pos,
+                            top: '4px',
                             width: '20px',
                             height: '20px',
                             borderRadius: '50%',
@@ -344,18 +343,18 @@ function SetupScreen() {
                             borderRadius: '14px',
                             position: 'relative',
                             transition: 'all 0.3s ease',
-                            border: '1.5px solid rgba(255, 255, 255, 0.25)',
+                            border: 'none',
                             cursor: 'pointer'
                         }}
                     >
                         <div style={{
                             position: 'absolute',
-                            left: state.enableHint ? '24px' : '3px',
-                            top: '3px',
+                            left: state.enableHint ? '24px' : '4px',
+                            top: '4px',
                             width: '20px',
                             height: '20px',
                             borderRadius: '50%',
-                            background: state.enableHint ? 'var(--bg-primary)' : 'white',
+                            background: 'white',
                             transition: 'all 0.3s ease'
                         }} />
                     </button>
@@ -378,14 +377,14 @@ function SetupScreen() {
                             borderRadius: '14px',
                             position: 'relative',
                             transition: 'all 0.3s ease',
-                            border: '1.5px solid rgba(255, 255, 255, 0.25)',
+                            border: 'none',
                             cursor: 'pointer'
                         }}
                     >
                         <div style={{
                             position: 'absolute',
-                            left: state.isNightmareMode ? '24px' : '3px',
-                            top: '3px',
+                            left: state.isNightmareMode ? '24px' : '4px',
+                            top: '4px',
                             width: '20px',
                             height: '20px',
                             borderRadius: '50%',
@@ -399,9 +398,9 @@ function SetupScreen() {
                 </p>
             </div>
 
-            <GlassButton variant="primary" onClick={startGame}>
+            <button className="btn-primary" onClick={startGame}>
                 START GAME
-            </GlassButton>
+            </button>
 
             <p style={{ textAlign: 'center', marginTop: 'var(--spacing-lg)', color: 'var(--text-secondary)', fontSize: 'var(--font-size-sm)' }}>
                 Pass the device to play together locally.

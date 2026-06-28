@@ -10,7 +10,6 @@ import InterviewPhase from './components/InterviewPhase';
 import ImpostorGuessPhase from './components/ImpostorGuessPhase';
 import { db } from "./lib/firebase";
 import { Analytics } from "@vercel/analytics/react"
-import DarkVeil from './components/DarkVeil';
 import './index.css';
 
 function GameContainer() {
@@ -56,9 +55,6 @@ function App() {
 
   return (
     <GameProvider>
-      <div style={{ position: 'fixed', inset: 0, zIndex: -1, pointerEvents: 'none', opacity: 0.25 }}>
-        <DarkVeil speed={0.15} noiseIntensity={0.015} warpAmount={0.15} />
-      </div>
       <GameContainer />
       <Analytics />
     </GameProvider>
