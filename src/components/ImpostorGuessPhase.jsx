@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGame, ROLE } from '../context/GameContext';
 import { UserX, AlertTriangle, Key } from 'lucide-react';
+import GlassButton from './GlassButton';
 
 function ImpostorGuessPhase() {
     const { state, dispatch } = useGame();
@@ -49,37 +50,34 @@ function ImpostorGuessPhase() {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: 'var(--spacing-xl)' }}>
                     {state.impostorGuessOptions.map((word) => (
-                        <button
+                        <GlassButton
                             key={word}
-                            className={selectedWord === word ? 'btn-primary' : 'btn-secondary'}
+                            variant="secondary"
                             style={{
-                                padding: '16px',
-                                fontSize: '1rem',
-                                border: selectedWord === word ? '2px solid white' : '1px solid rgba(255,255,255,0.1)',
+                                height: '54px',
                                 background: selectedWord === word ? 'var(--accent-error)' : 'rgba(255,255,255,0.05)',
                                 color: 'white',
+                                border: selectedWord === word ? '2px solid white' : '1px solid rgba(255,255,255,0.1)',
+                                transform: selectedWord === word ? 'scale(1.05)' : 'scale(1)',
                                 transition: 'all 0.2s ease',
-                                transform: selectedWord === word ? 'scale(1.05)' : 'scale(1)'
                             }}
                             onClick={() => setSelectedWord(word)}
                         >
                             {word}
-                        </button>
+                        </GlassButton>
                     ))}
                 </div>
 
-                <button
-                    className="btn-primary"
+                <GlassButton
+                    variant="primary"
                     onClick={handleGuess}
                     disabled={!selectedWord}
                     style={{
-                        width: '100%',
-                        background: !selectedWord ? 'var(--bg-tertiary)' : 'white',
-                        color: !selectedWord ? 'var(--text-secondary)' : 'var(--bg-primary)'
+                        width: '100%'
                     }}
                 >
                     Submit Guess
-                </button>
+                </GlassButton>
             </div>
         </div>
     );

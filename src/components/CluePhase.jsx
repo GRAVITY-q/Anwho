@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGame } from '../context/GameContext';
 import { MessageSquare, User } from 'lucide-react';
+import GlassButton from './GlassButton';
 import { CATEGORIES } from '../data/words';
 
 function CluePhase() {
@@ -48,11 +49,11 @@ function CluePhase() {
             </div>
 
             <div style={{ marginTop: 'auto', width: '100%' }}>
-                <button className="btn-primary" onClick={handleNext}>
+                <GlassButton variant="primary" onClick={handleNext}>
                     <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                         {state.gameMode === 'fast' ? "Ready to Vote" : "Start Discussion"} <MessageSquare size={20} />
                     </span>
-                </button>
+                </GlassButton>
             </div>
         </div>
     );

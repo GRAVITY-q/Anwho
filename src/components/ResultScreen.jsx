@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useGame, PHASE, ROLE } from '../context/GameContext';
 import { Trophy, Skull, RotateCcw, ArrowRight, Fingerprint, Scale } from 'lucide-react';
-
+import GlassButton from './GlassButton';
 const styles = {
-    // Full-screen container that handles safe scrolling on phones
+    // Flows naturally inside the main container to support native scroll on iOS
     screenWrapper: {
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '100dvh',
         width: '100%',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 50,
-        background: 'radial-gradient(ellipse at top, #1e293b, #0f172a)',
-        overflowY: 'auto',
-        WebkitOverflowScrolling: 'touch',
+        flex: 1,
+        justifyContent: 'center',
+        minHeight: '70dvh', // Ensures centering even on short viewports
     },
     // Scrollable content area that grows
     scrollArea: {
@@ -24,22 +19,19 @@ const styles = {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '24px 20px 16px',
+        padding: '24px 0 16px',
         width: '100%',
         maxWidth: '460px',
         margin: '0 auto',
     },
-    // Sticky bottom bar so the button is always reachable
+    // Flows naturally at the bottom of the page content
     stickyBottom: {
-        position: 'sticky',
-        bottom: 0,
         width: '100%',
-        padding: '16px 20px',
-        paddingBottom: 'max(16px, env(safe-area-inset-bottom))',
-        background: 'linear-gradient(to top, #0f172a 60%, transparent)',
-        zIndex: 10,
+        padding: '16px 0',
+        paddingBottom: 'max(40px, env(safe-area-inset-bottom) + 24px)',
         display: 'flex',
         justifyContent: 'center',
+        marginTop: '32px',
     },
     stickyButtonInner: {
         width: '100%',
@@ -47,7 +39,7 @@ const styles = {
     },
     // Big CTA button sizing for easy tapping
     bigButton: {
-        boxShadow: '0 8px 32px rgba(99, 102, 241, 0.4)',
+        boxShadow: '0 8px 32px rgba(255, 255, 255, 0.15)',
         borderRadius: '16px',
         padding: '18px 24px',
         fontSize: '1.1rem',
@@ -242,9 +234,9 @@ function ResultScreen() {
                 </div>
                 <div style={styles.stickyBottom}>
                     <div style={styles.stickyButtonInner}>
-                        <button className="btn-primary" onClick={handleProceed} style={styles.bigButton}>
+                        <GlassButton variant="primary" onClick={handleProceed} style={styles.bigButton} borderRadius={16}>
                             Start Tie-Breaker <ArrowRight size={20} />
-                        </button>
+                        </GlassButton>
                     </div>
                 </div>
             </div>
@@ -423,9 +415,9 @@ function ResultScreen() {
                 {/* Sticky Play Again Button */}
                 <div style={styles.stickyBottom}>
                     <div style={styles.stickyButtonInner}>
-                        <button className="btn-primary" onClick={() => dispatch({ type: 'RESET_GAME' })} style={styles.bigButton}>
+                        <GlassButton variant="primary" onClick={() => dispatch({ type: 'RESET_GAME' })} style={styles.bigButton} borderRadius={16}>
                             <RotateCcw size={20} /> Play Again
-                        </button>
+                        </GlassButton>
                     </div>
                 </div>
             </div>
@@ -533,9 +525,9 @@ function ResultScreen() {
             {/* Sticky Continue Button */}
             <div style={styles.stickyBottom}>
                 <div style={styles.stickyButtonInner}>
-                    <button className="btn-primary" onClick={handleProceed} style={styles.bigButton}>
+                    <GlassButton variant="primary" onClick={handleProceed} style={styles.bigButton} borderRadius={16}>
                         Continue <ArrowRight size={20} />
-                    </button>
+                    </GlassButton>
                 </div>
             </div>
         </div>
